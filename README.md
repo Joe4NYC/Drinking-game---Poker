@@ -6,8 +6,9 @@ A browser-based Hong Kong-style drinking card game built with vanilla HTML, CSS,
 
 ## 🌐 Live Demo
 
-> Deploy via GitHub Pages or any static hosting. Open `index.html` to start.
+🎮 **[▶ Play Now — drinkingamepokder.netlify.app](https://drinkingamepokder.netlify.app/)**
 
+> No installation needed — just open the link and start playing!
 ---
 
 ## 📁 Project Structure
