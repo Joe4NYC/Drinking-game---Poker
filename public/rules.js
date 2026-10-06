@@ -104,13 +104,23 @@ const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 const SUITS = ['♠', '♥', '♦', '♣'];
 
 // 牌面 HTML（遊戲頁同規則頁共用）
+const SUIT_KEY = { '♥': 'h', '♦': 'd', '♠': 's', '♣': 'c', red: 'j', black: 'j' };
+const SUIT_PATH = {
+  h: 'M50 90C22 68 6 52 6 32 6 17 17 7 31 7c9 0 15 5 19 12 4-7 10-12 19-12 14 0 25 10 25 25 0 20-16 36-44 58Z',
+  d: 'M50 4 88 50 50 96 12 50Z',
+  s: 'M50 5c13 22 42 35 42 56 0 14-10 22-22 22-7 0-13-3-16-9 1 9 5 16 12 22H34c7-6 11-13 12-22-3 6-9 9-16 9-12 0-22-8-22-22C8 40 37 27 50 5Z',
+  c: 'M50 6a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM27 39a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM73 39a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM45 50h10c0 19 4 33 13 45H32c9-12 13-26 13-45Z',
+  j: 'M50 4l13 30 32 3-24 21 7 32-28-17-28 17 7-32L5 37l32-3Z',
+};
 const isRed = c => c.s === '♥' || c.s === '♦' || c.s === 'red';
+const suitSVG = k => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${SUIT_PATH[k]}"/></svg>`;
 function faceClass(c) {
   return 'face front' + (isRed(c) ? ' red' : '') + (c.r === 'JK' ? ' joker' : '');
 }
 function faceHTML(c) {
+  const k = SUIT_KEY[c.s];
   const label = c.r === 'JK' ? 'JOKER' : c.r;
-  const suit = c.r === 'JK' ? '' : `<i>${c.s}</i>`;
-  const center = c.r === 'JK' ? '★' : ['J', 'Q', 'K'].includes(c.r) ? `<b>${c.r}</b>` : c.s;
-  return `<span class="corner">${label}${suit}</span><span class="pip">${center}</span><span class="corner br">${label}${suit}</span>`;
+  const center = ['J', 'Q', 'K'].includes(c.r) ? `<b>${c.r}</b>` : suitSVG(k);
+  const corner = `${label}${c.r === 'JK' ? '' : suitSVG(k)}`;
+  return `<span class="corner">${corner}</span><span class="pip">${center}</span><span class="corner br">${corner}</span>`;
 }

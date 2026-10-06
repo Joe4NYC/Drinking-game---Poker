@@ -25,7 +25,7 @@ function shuffle(a) {
 }
 
 function newGame() {
-  return { deck: shuffle(buildDeck()), drawn: 0, turn: 0, last: null, buddy: null, crazy: null, toilet: {}, pass: {}, laws: [] };
+  return { deck: shuffle(buildDeck()), drawn: 0, turn: 0, last: null, hist: [], buddy: null, crazy: null, toilet: {}, pass: {}, laws: [] };
 }
 
 const save = () => { store.set('opts', opts); store.set('game', g); };
@@ -37,16 +37,18 @@ function draw() {
   busy = true;
   wake();
 
-  let card, note = '';
+  let card;
   if (opts.repeat) {
     const d = buildDeck();
     card = d[Math.floor(Math.random() * d.length)];
   } else {
     if (!g.deck.length) {
       g.deck = shuffle(buildDeck());
-      note = '成副牌抽晒，已經重新洗牌！';
+      g.hist = [];
+      toast('成副牌抽晒，已經重新洗牌');
     }
     card = g.deck.pop();
+    g.hist.push(SUIT_KEY[card.s]);
   }
   g.drawn++;
 
@@ -57,7 +59,7 @@ function draw() {
   if (card.r === '10') g.crazy = holder;
   if (card.r === '8') g.toilet[holder] = (g.toilet[holder] || 0) + 1;
   if (card.r === 'JK') g.pass[holder] = (g.pass[holder] || 0) + 1;
-  g.last = { card, who, prev: n ? seat(g.turn - 1) : null, next: n ? seat(g.turn + 1) : null, note };
+  g.last = { card, who, prev: n ? seat(g.turn - 1) : null, next: n ? seat(g.turn + 1) : null };
   if (n) g.turn = (g.turn + 1) % n;
   save();
 
@@ -66,9 +68,10 @@ function draw() {
   const el = $('#card');
   const wasUp = el.classList.contains('up');
   el.classList.remove('up');
+  $('#sticker').classList.remove('on');
   setTimeout(() => {
     showCard();
-    renderRule();
+    renderRule(true);
     renderStatus();
     renderTurn();
     sfx(card.r === 'K' ? 520 : 700, card.r === 'K' ? 1040 : 980, 0.1);
@@ -77,71 +80,112 @@ function draw() {
 }
 
 function showCard() {
+  const { card, who } = g.last;
   const front = $('#front');
-  front.className = faceClass(g.last.card);
-  front.innerHTML = faceHTML(g.last.card);
+  front.className = faceClass(card);
+  front.innerHTML = faceHTML(card);
   $('#card').classList.add('up');
+  const st = $('#sticker');
+  st.dataset.suit = SUIT_KEY[card.s];
+  st.textContent = who ? `${who} 抽` : '';
+  setTimeout(() => st.classList.add('on'), 350);
 }
 
 // ---------- 畫面 ----------
 function renderTurn() {
-  $('#turn').innerHTML = opts.players.length
-    ? `輪到 <b>${esc(seat(g.turn))}</b> 抽牌`
-    : `<button class="link-btn" type="button" data-open-settings>＋ 加入玩家名</button> 自動計上家下家`;
-  $('#count').textContent = opts.repeat ? `已抽 ${g.drawn} 張` : `剩 ${g.deck.length} 張`;
+  $('#turn').innerHTML = (opts.players.length
+    ? `<span>輪到 <b>${esc(seat(g.turn))}</b></span>`
+    : `<button class="link-btn" type="button" data-open-settings>加入玩家名</button>`)
+    + `<span class="left">${opts.repeat ? `已抽 ${g.drawn} 張` : `剩 ${g.deck.length} 張`}</span>`;
+
+  const rail = $('#rail');
+  rail.hidden = opts.repeat;
+  if (!opts.repeat) {
+    const total = buildDeck().length;
+    rail.style.setProperty('--n', total);
+    rail.innerHTML = Array.from({ length: total }, (_, i) =>
+      g.hist[i] ? `<i data-suit="${g.hist[i]}"></i>` : '<i></i>').join('');
+  }
 }
 
-function renderRule() {
+// 每張牌由邊個做：入咗玩家名先有
+const ACTS = {
+  A: (w) => `${w} 揀人飲`, 2: (w) => `${w} 做陪飲員`, 8: (w) => `${w} 收咗廁所卡`,
+  10: (w) => `${w} 做癡線佬`, JK: (w) => `${w} 收咗免飲卡`, K: (w) => `${w} 自己飲`,
+  J: (w, p) => `${p} 飲`, Q: (w, p, n) => `${n} 飲`,
+};
+
+function renderRule(animate) {
   const box = $('#rule');
+  const chant = text => `<h2 class="chant" style="--n:${[...text].length}" aria-label="${esc(text)}">${[...text].map((ch, i) =>
+    `<span aria-hidden="true" style="--i:${i}">${ch === ' ' ? '&nbsp;' : esc(ch)}</span>`).join('')}</h2>`;
+
   if (!g.last) {
-    box.innerHTML = `<p class="kicker">準備好未？</p><h2>撳牌堆抽牌</h2>
-      <p class="short">抽到咩牌就做咩，規則同玩法會喺度顯示。</p>`;
+    box.dataset.suit = 'none';
+    box.innerHTML = `<div class="field-in">${chant('撳抽牌開始')}
+      <p class="short">抽到咩牌就做咩，規則同玩法會喺度出。</p></div>`;
     return;
   }
-  const { card, who, prev, next, note } = g.last;
+  const { card, who, prev, next } = g.last;
   const rule = RULES[card.r];
   const custom = opts.custom[card.r];
-  const target = { J: prev && `${prev} 飲！`, Q: next && `${next} 飲！`, K: who && `${who} 自己飲！` }[card.r];
-  const tag = card.r === 'JK' ? '鬼' : card.r;
+  const act = who && (ACTS[card.r] || (w => `${w} 開始`))(who, prev, next);
 
-  box.innerHTML = `${note ? `<p class="note">${note}</p>` : ''}
-    <p class="kicker">${who ? `${esc(who)} 抽到` : `第 ${g.drawn} 張`}</p>
-    <h2><span class="tag">${tag}</span>${esc(custom || rule.name)}</h2>
+  box.dataset.suit = SUIT_KEY[card.s];
+  box.innerHTML = `<div class="field-in">
+    ${chant(custom || rule.name)}
     ${custom ? '' : `<p class="short">${rule.short}</p>`}
-    ${target ? `<p class="target">${esc(target)}</p>` : ''}
+    ${act ? `<p class="target">${esc(act)}</p>` : ''}
     ${card.r === '4' ? `<form class="law-form" id="law-form">
       <input type="text" name="law" maxlength="40" placeholder="寫低新規矩，方便大家記住" aria-label="新規矩">
-      <button class="primary">記低</button></form>` : ''}
+      <button>記低</button></form>` : ''}
     ${custom ? '' : `<details><summary>點玩？</summary>
       <ol class="how">${rule.how.map(h => `<li>${h}</li>`).join('')}</ol>
-      ${rule.examples ? `<p class="ex">例如：${rule.examples.join('、')}</p>` : ''}</details>`}`;
+      ${rule.examples ? `<p class="ex"><b>例如：</b>${rule.examples.join('、')}</p>` : ''}
+      <p class="ex"><a href="/rules#r-${card.r}">睇 ${card.r === 'JK' ? '鬼牌' : card.r} 嘅完整教學</a></p></details>`}
+    </div>`;
+
+  if (animate) {
+    box.classList.remove('unfurl');
+    void box.offsetWidth;
+    box.classList.add('unfurl');
+    box.style.setProperty('--n', [...(custom || rule.name)].length);
+    // 叫口號：每蓋一粒字震一下
+    [...(custom || rule.name)].forEach((_, i) => setTimeout(() => navigator.vibrate?.(12), 350 + i * 140));
+  }
 }
+
+const X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
 function renderStatus() {
   const chips = [];
   if (g.buddy) chips.push(`<span class="chip"><small>陪飲員</small>${esc(g.buddy)}</span>`);
   if (g.crazy) chips.push(`<span class="chip"><small>癡線佬</small>${esc(g.crazy)}</span>`);
-  for (const [kind, icon, label] of [['toilet', '🚽', '廁所卡'], ['pass', '🍀', '免飲卡']]) {
+  for (const [kind, label] of [['toilet', '廁所卡'], ['pass', '免飲卡']]) {
     for (const [name, c] of Object.entries(g[kind])) {
       chips.push(`<button class="chip use" type="button" data-use="${kind}" data-name="${esc(name)}"
-        title="撳一下用咗一張">${icon} ${esc(name)} <small>${label} ×${c}</small></button>`);
+        title="撳一下用咗一張"><small>${label}</small>${esc(name)} ×${c}</button>`);
     }
   }
   const laws = g.laws.map((l, i) =>
-    `<li>${esc(l)}<button class="x" type="button" data-law="${i}" aria-label="取消呢條規矩">✕</button></li>`).join('');
+    `<li>${esc(l)}<button class="x" type="button" data-law="${i}" aria-label="取消呢條規矩">${X_ICON}</button></li>`).join('');
 
   $('#status').innerHTML = chips.length || laws
-    ? `<h3>場上狀態${chips.some(c => c.includes('data-use')) ? '（撳卡＝用咗一張）' : ''}</h3>
+    ? `<h2>場上狀態${chips.some(c => c.includes('data-use')) ? ' <small>撳白色卡＝用咗一張</small>' : ''}</h2>
       <div class="chips">${chips.join('')}</div>${laws ? `<ul class="laws">${laws}</ul>` : ''}`
     : '';
 }
 
 function render() {
+  g.hist ??= [];
   renderTurn();
-  renderRule();
+  renderRule(false);
   renderStatus();
   if (g.last) showCard();
-  else $('#card').classList.remove('up');
+  else {
+    $('#card').classList.remove('up');
+    $('#sticker').textContent = '';
+  }
 }
 
 // ---------- 音效 / 震動 / 防熄 mon ----------
@@ -208,6 +252,7 @@ $('#settings').addEventListener('close', e => {
     toast('新一局，已洗牌');
   } else if (jokerChanged) {
     g.deck = shuffle(buildDeck());
+    g.hist = [];
     toast(opts.joker ? '已加入大小鬼，重新洗牌' : '已移除大小鬼，重新洗牌');
   }
   if (opts.players.length) g.turn %= opts.players.length;
@@ -245,7 +290,7 @@ $('#rule').addEventListener('submit', e => {
   const text = e.target.law.value.trim();
   if (text) g.laws.push(text);
   save();
-  e.target.outerHTML = `<p class="short">${text ? '✔ 記低咗，睇下面「場上狀態」' : ''}</p>`;
+  e.target.outerHTML = `<p class="short">${text ? '記低咗，睇下面「場上狀態」' : ''}</p>`;
   renderStatus();
 });
 
@@ -264,7 +309,7 @@ age.addEventListener('cancel', e => e.preventDefault());
 age.addEventListener('close', () => {
   if (age.returnValue === 'yes') return store.set('adult', true);
   document.body.innerHTML = `<main class="wrap"><p class="foot" style="font-size:18px;padding-top:30svh">
-    多謝你誠實 🧃<br>滿 18 歲再嚟玩啦！</p></main>`;
+    多謝你誠實。<br>滿 18 歲再嚟玩啦！</p></main>`;
 });
 if (!store.get('adult', false)) age.showModal();
 

@@ -4,3 +4,4 @@ routes = [{ pattern = "drink.joenyc.net", custom_domain = true }]
 
 [assets]
 directory = "./public"
+not_found_handling = "404-page"
