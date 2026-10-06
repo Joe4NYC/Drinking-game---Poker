@@ -1,129 +1,40 @@
-# 🃏 酒Game 大排檔 — Online Drinking Game (Poker Edition)
+# 酒Game大排檔
 
-A browser-based Hong Kong-style drinking card game built with vanilla HTML, CSS, and JavaScript. Players take turns drawing cards from a virtual deck, and each card triggers a unique drinking rule inspired by local Cantonese party game culture.
+香港網上抽牌飲酒遊戲：唔使帶撲克牌、唔使睇對照表，抽牌即刻顯示規則同玩法教學。
 
----
+▶ https://drink.joenyc.net
 
-## 🌐 Live Demo
+## 功能
 
-🎮 **[▶ Play Now — drinkingamepokder.netlify.app](https://drinkingamepokder.netlify.app/)**
+- 抽牌即顯示規則，每張牌有「點玩？」教學
+- 可入玩家名：自動顯示輪到邊個、上家下家，記低陪飲員、癡線佬、廁所卡、免飲卡、開咗嘅規矩
+- 自訂規則、大小鬼、無限模式
+- 重新整理唔會唔見進度（localStorage）
+- PWA：可加到主畫面、離線玩；抽牌期間唔會熄 mon
+- 18+ 年齡確認
 
-> No installation needed — just open the link and start playing!
----
-
-## 📁 Project Structure
+## 結構
 
 ```
-Drinking-game---Poker/
-├── index.html            # Main game page
-├── intro.html            # Game introduction page
-├── rules.html            # Full rules reference page
-├── poker_game.js         # Core game logic
-├── preload-manager.js    # Asset preloading manager
-├── styles.css            # Stylesheet
-├── pokers image/         # Card face images (JPEG)
-├── bgPhoto/              # Background images
-├── sounds/               # Sound effects (shuffle, draw, flip, end)
-├── sitemap.xml           # SEO sitemap
-├── robots.txt            # Crawler rules
-└── googlecd6a916cfd55f822.html  # Google Search Console verification
+public/          # 成個網站，直接上 Cloudflare
+  index.html     # 遊戲
+  rules.html     # 規則同教學（由 rules.js 生成）
+  rules.js       # 規則資料 + 牌面 HTML，兩頁共用
+  app.js         # 遊戲邏輯
+  style.css
+  sw.js          # 離線快取
+wrangler.toml    # Cloudflare Workers 靜態資源設定
+netlify.toml     # 舊 Netlify 網址 301 去新網域
 ```
 
----
+冇 build step，冇依賴。改規則只需要改 `public/rules.js`。
 
-## 🎮 How to Play
-
-1. Open the game in any modern browser.
-2. Configure settings (optional):
-   - **包含鬼牌 (Joker)** — Toggle to include Joker cards.
-   - **允許重複抽牌** — Allow repeated card draws (infinite mode).
-   - **音效 / 背景音樂** — Toggle sound effects and background music.
-3. Click **抽牌** to draw a card.
-4. Follow the rule shown on screen!
-5. Click **結束遊戲** to end the session and reshuffle.
-
----
-
-## 📜 Card Rules (牌面規則)
-
-| Card | Rule |
-|------|------|
-| **A** | 指定一人飲 |
-| **2** | 陪飲員 — 跟住每個要飲的人一起飲，直到下一個人抽到 2 |
-| **3** | 大細波 — 做錯動作或講錯就飲一啖 |
-| **4** | 開規矩 — 自訂規則，犯規者飲一啖 |
-| **5** | 圍枚 |
-| **6** | 開 Topic — 輪流回答，講唔出或重複者飲 |
-| **7** | 拍 7 — 報數遊戲，7 或 7 的倍數要拍手 |
-| **8** | 廁所卡 — 保留作上廁所免飲用 |
-| **9** | 撞機 — 同時講出相同數字或最後報數者飲 |
-| **10** | 癡線佬 — 其他人應聲就要飲 |
-| **J** | 上家飲 |
-| **Q** | 下家飲 |
-| **K** | 自己飲（飲啦飲啦！） |
-| **Joker** | 免飲一杯 🍀 |
-
----
-
-## ⚙️ Technical Features
-
-- **Pure vanilla JS** — No frameworks or dependencies required.
-- **Fisher-Yates shuffle** — Fair and unbiased deck shuffling algorithm.
-- **DOM caching** — Frequently accessed elements are cached to boost performance.
-- **Image preloading** — Card images are preloaded using `requestIdleCallback` to ensure smooth gameplay.
-- **Sound system** — Sound effects for drawing, flipping, shuffling, and game end.
-- **Background music toggle** — Optional looping background music.
-- **Responsive design** — Mobile-friendly layout.
-- **Deck animation** — Visual draw and shuffle animations.
-- **`requestIdleCallback` polyfill** — Cross-browser compatibility.
-
----
-
-## 🚀 Getting Started
-
-No build tools or installations needed.
+## 本地開發 / 部署
 
 ```bash
-# Clone the repository
-git clone https://github.com/Joe4NYC/Drinking-game---Poker.git
-
-# Open in browser
-open index.html
+wrangler dev
 ```
 
-Or simply drag `index.html` into any browser window.
-
----
-
-## 🛠️ Customisation
-
-To add or modify rules, edit the `rules` object in `poker_game.js`:
-
-```js
-const rules = {
-  'A': '指個一人飲',
-  'K': '自己飲',
-  // Add your own rules here...
-};
+```bash
+wrangler deploy
 ```
-
-To add new sound effects, place `.mp3` files in the `sounds/` folder and update the `audioFiles` object in `poker_game.js`.
-
----
-
-## 👥 Contributors
-
-- [Joe4NYC](https://github.com/Joe4NYC)
-- [Ambrose-Kwan](https://github.com/Ambrose-Kwan)
-
----
-
-## ⚠️ Disclaimer
-
-This project is intended for entertainment purposes among legal-drinking-age adults. Please drink responsibly. The developers do not encourage excessive alcohol consumption.
-
----
-
-## 📄 License
-
-This project is open source. Feel free to fork and customise for your own game nights!

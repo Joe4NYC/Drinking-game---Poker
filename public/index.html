@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>酒Game大排檔｜網上抽牌飲酒遊戲，邊抽邊睇規則</title>
+  <meta name="description" content="香港飲酒遊戲網上版：唔使帶撲克牌、唔使睇對照表，撳一下抽牌即刻顯示規則同玩法教學。自動記低陪飲員、廁所卡、開咗咩規矩，免費玩，手機即用。">
+  <link rel="canonical" href="https://drink.joenyc.net/">
+  <meta name="theme-color" content="#100d0b">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://drink.joenyc.net/">
+  <meta property="og:title" content="酒Game大排檔｜網上抽牌飲酒遊戲">
+  <meta property="og:description" content="唔使撲克牌、唔使對照表，抽牌即刻睇到規則。">
+  <meta property="og:image" content="https://drink.joenyc.net/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/style.css">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"酒Game大排檔","url":"https://drink.joenyc.net/","applicationCategory":"GameApplication","operatingSystem":"Any","inLanguage":"zh-HK","offers":{"@type":"Offer","price":"0","priceCurrency":"HKD"}}
+  </script>
+</head>
+<body>
+  <header class="wrap top">
+    <a class="logo" href="/">酒Game<b>大排檔</b></a>
+    <nav class="nav">
+      <a class="pill" href="/rules">規則教學</a>
+      <button class="pill" id="share" type="button">分享</button>
+      <button class="pill" id="open-settings" type="button">設定</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="turn" id="turn"></p>
+
+    <section class="table">
+      <button class="deck" id="deck" type="button" aria-label="抽牌"><span class="count" id="count"></span></button>
+      <div class="card" id="card">
+        <div class="inner">
+          <div class="face back"></div>
+          <div class="face front" id="front"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rule" id="rule" aria-live="polite"></section>
+    <section class="status" id="status"></section>
+
+    <p class="foot">酒Game大排檔係香港網上抽牌飲酒遊戲：唔使帶撲克牌，唔使睇對照表，抽牌即刻睇到規則同玩法。<br>請理性飲酒，飲酒唔好揸車，未滿 18 歲不得飲酒。</p>
+  </main>
+
+  <footer class="bar">
+    <button class="draw" id="draw" type="button">抽牌</button>
+  </footer>
+
+  <dialog id="settings">
+    <form method="dialog">
+      <h2>設定</h2>
+      <label>玩家（按座位次序，每行一個名）
+        <textarea name="players" rows="4" placeholder="阿明&#10;阿詩&#10;大舊"></textarea>
+      </label>
+      <p class="hint">入咗名會自動顯示輪到邊個、上家下家，同記低陪飲員、廁所卡喺邊個度。唔入都玩得。</p>
+      <label class="switch"><input type="checkbox" name="joker"> 加入大小鬼（免飲卡）</label>
+      <label class="switch"><input type="checkbox" name="repeat"> 無限模式（每張都可能重複出現）</label>
+      <label class="switch"><input type="checkbox" name="sound"> 音效</label>
+      <details>
+        <summary>自訂規則</summary>
+        <p class="hint">你哋玩法唔同？喺度改，留空就用預設規則。</p>
+        <div id="custom"></div>
+      </details>
+      <div class="row">
+        <button class="ghost" type="button" id="new-game">新一局</button>
+        <button class="primary" value="ok">完成</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="age" class="age">
+    <form method="dialog">
+      <div class="big">🍻</div>
+      <h2>你滿 18 歲未？</h2>
+      <p>呢個係飲酒遊戲，只限 18 歲或以上人士。<br>請理性飲酒，飲酒唔好揸車。</p>
+      <div class="row">
+        <button class="ghost" value="no">未滿 18 歲</button>
+        <button class="primary" value="yes">我已滿 18 歲</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="/rules.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

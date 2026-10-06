@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://drinkingamepokder.netlify.app/sitemap.txt

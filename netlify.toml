@@ -1,0 +1,6 @@
+# 舊網址轉去新網域
+[[redirects]]
+  from = "/*"
+  to = "https://drink.joenyc.net/:splat"
+  status = 301
+  force = true

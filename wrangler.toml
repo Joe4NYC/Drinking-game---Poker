@@ -1,0 +1,6 @@
+name = "drinking-game-poker"
+compatibility_date = "2026-09-08"
+routes = [{ pattern = "drink.joenyc.net", custom_domain = true }]
+
+[assets]
+directory = "./public"
