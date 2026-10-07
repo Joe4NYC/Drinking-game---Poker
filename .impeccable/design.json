@@ -276,7 +276,7 @@
       "kind": "chip",
       "refersTo": "chip",
       "description": "Table-state chips; usable cards invert to paper.",
-      "html": "<div class=\"ds-chips\"><span class=\"ds-chip\"><small>陪飲員</small>阿明</span><button class=\"ds-chip ds-use\" type=\"button\"><small>廁所卡</small>阿詩</button></div>",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-chip\"><small>陪飲員</small>阿明</span><button class=\"ds-chip ds-use\" type=\"button\"><small>廁所牌</small>阿詩</button></div>",
       "css": ":host{--ink:#141210;--ink-2:#1e1b18;--ink-3:#2b2723;--line:#3a342e;--paper:#f3eee3;--muted:#b3aa9e;--red:#d92b25;--yellow:#ffc400;--blue:#2f5bea;--green:#19b35f;--display:\"Chiron Hei HK\",\"PingFang HK\",\"Noto Sans HK\",sans-serif;--body:\"PingFang HK\",\"Noto Sans HK\",\"Microsoft JhengHei\",system-ui,sans-serif;--ease:cubic-bezier(0.16,1,0.3,1)} .ds-chips{display:flex;flex-wrap:wrap;gap:8px;padding:16px;background:var(--ink)} .ds-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:0;border-radius:6px;background:var(--ink-3);color:var(--paper);font:800 17px/1 var(--body)} .ds-chip small{color:var(--muted);font-weight:400;font-size:1em} .ds-use{background:var(--paper);color:var(--ink);cursor:pointer} .ds-use small{color:#5c554c} .ds-use:hover{background:#fff} .ds-use:focus-visible{outline:3px solid var(--yellow,#ffc400);outline-offset:3px}"
     },
     {

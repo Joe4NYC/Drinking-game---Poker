@@ -227,7 +227,7 @@ Tactile paper slabs on ink; flat, firm, and large.
 
 ### Chips
 - **Style:** Control Ink, 6px radius, 44px tall, weight 800 name with a 400-weight Muted Paper label before it (陪飲員, 癡線佬).
-- **State:** usable cards (廁所卡, 免飲卡) invert to paper with ink text and go white on hover.
+- **State:** usable cards (廁所牌, 免飲牌) invert to paper with ink text and go white on hover.
 
 ### Inputs / Fields
 - **Style:** Night Ink fill, 2px transparent border, 8px radius, 48px minimum, yellow caret, Muted Paper placeholder.

@@ -123,8 +123,8 @@ function renderTurn() {
 
 // 每張牌由邊個做：入咗玩家名先有
 const ACTS = {
-  A: (w) => `${w} 揀人飲`, 2: (w) => `${w} 做陪飲員`, 8: (w) => `${w} 收咗廁所卡`,
-  10: (w) => `${w} 做癡線佬`, JK: (w) => `${w} 收咗免飲卡`, K: (w) => `${w} 自己飲`,
+  A: (w) => `${w} 揀人飲`, 2: (w) => `${w} 做陪飲員`, 8: (w) => `${w} 收咗廁所牌`,
+  10: (w) => `${w} 做癡線佬`, JK: (w) => `${w} 收咗免飲牌`, K: (w) => `${w} 自己飲`,
   J: (w, p) => `${p} 飲`, Q: (w, p, n) => `${n} 飲`,
 };
 
@@ -171,7 +171,7 @@ function renderStatus() {
   const chips = [];
   if (g.buddy) chips.push(`<span class="chip"><small>陪飲員</small>${esc(g.buddy)}</span>`);
   if (g.crazy) chips.push(`<span class="chip"><small>癡線佬</small>${esc(g.crazy)}</span>`);
-  for (const [kind, label] of [['toilet', '廁所卡'], ['pass', '免飲卡']]) {
+  for (const [kind, label] of [['toilet', '廁所牌'], ['pass', '免飲牌']]) {
     for (const [name, c] of Object.entries(g[kind])) {
       chips.push(`<button class="chip use" type="button" data-use="${kind}" data-name="${esc(name)}"
         title="撳一下用咗一張"><small>${label}</small>${esc(name)} ×${c}</button>`);
@@ -181,7 +181,7 @@ function renderStatus() {
     `<li>${esc(l)}<button class="x" type="button" data-law="${i}" aria-label="取消呢條規矩">${X_ICON}</button></li>`).join('');
 
   $('#status').innerHTML = chips.length || laws
-    ? `<h2>場上狀態${chips.some(c => c.includes('data-use')) ? ' <small>撳白色卡＝用咗一張</small>' : ''}</h2>
+    ? `<h2>場上狀態${chips.some(c => c.includes('data-use')) ? ' <small>撳一下＝用咗一張</small>' : ''}</h2>
       <div class="chips">${chips.join('')}</div>${laws ? `<ul class="laws">${laws}</ul>` : ''}`
     : '';
 }
@@ -287,7 +287,7 @@ $('#status').addEventListener('click', e => {
   if (use) {
     const bag = g[use.dataset.use], name = use.dataset.name;
     if (--bag[name] <= 0) delete bag[name];
-    toast(`${name} 用咗一張${use.dataset.use === 'toilet' ? '廁所卡' : '免飲卡'}`);
+    toast(`${name} 用咗一張${use.dataset.use === 'toilet' ? '廁所牌' : '免飲牌'}`);
   } else if (law) {
     g.laws.splice(+law.dataset.law, 1);
   } else return;

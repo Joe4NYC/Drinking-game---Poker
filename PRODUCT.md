@@ -27,14 +27,15 @@ Local Cantonese drinking-game rules (陪飲員, 大細波, 圍枚, 拍 7, 撞機
 ## Capabilities and Constraints
 
 - Static site with no build step and no dependencies (vanilla HTML/CSS/JS in `public/`), deployed to Cloudflare Workers static assets at drink.joenyc.net.
-- Features: draw with a 52-card deck or 54 with jokers, infinite mode, optional player names (turn order, 上家/下家, tracking of 陪飲員/癡線佬/廁所卡/免飲卡/house rules), custom rule text per card, synthesized sound, vibration, wake lock, PWA/offline, and an 18+ age gate.
+- Features: draw with a 52-card deck or 54 with jokers, infinite mode, optional player names (turn order, 上家/下家, tracking of 陪飲員/癡線佬/廁所牌/免飲牌/house rules), custom rule text per card, synthesized sound, vibration, wake lock, PWA/offline, and an 18+ age gate.
 - Rule data lives in `public/rules.js` and is shared by the game page and the rules/tutorial page.
 - Free, with no accounts and no multi-device rooms.
 
 ## Brand Commitments
 
 - Name: 酒Game大排檔.
-- Voice: colloquial Hong Kong Cantonese (廣東話口語), playful but clear.
+- Voice: colloquial Hong Kong Cantonese (廣東話口語), playful but clear. Avoid mixing in written Chinese (書面語) such as 不得, 人士, 出示, 保留, 成為.
+- Terminology: playing cards are 啤牌 (not 撲克牌); keepable cards are 牌 (廁所牌, 免飲牌), never 卡.
 - Cards are drawn in code. No third-party card images, so there is no copyright risk.
 
 ## Evidence on Hand
