@@ -1,5 +1,5 @@
 // 離線都玩到：先用快取，背景再更新（stale-while-revalidate）
-const CACHE = 'drink-v2';
+const CACHE = 'drink-v3';
 const FILES = ['/', '/rules', '/style.css', '/app.js', '/rules.js', '/icon.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', e => {

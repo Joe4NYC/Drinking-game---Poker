@@ -1,6 +1,6 @@
 ---
 name: 酒Game大排檔
-description: Camp group banner at night. Each draw floods the rule zone in its suit's group colour and stamps the rule name.
+description: Camp group banner at night. Each draw floods the rule zone in its suit's group colour and stamps the rule name onto the card face.
 colors:
   night-ink: "#141210"
   ink-raised: "#1e1b18"
@@ -126,11 +126,11 @@ components:
 
 **Creative North Star: "The Camp Group Banner" (迎新營組旗)**
 
-The system is an orientation-camp night: a dark table, one phone, and four group colours from the camp tees. The ground is warm night-ink with paper-coloured text. Colour never arrives as an accent. It arrives as a full-bleed field that belongs to whichever suit was just drawn, and the rule name is stamped across it in very heavy Hong Kong-standard Hei, slightly tilted, like a group chanting its cheer. Everything outside that field stays quiet ink, so the field always carries the moment.
+The system is an orientation-camp night: a dark table, one phone, and four group colours from the camp tees. The ground is warm night-ink with paper-coloured text. Colour never arrives as an accent. It arrives as a full-bleed field that belongs to whichever suit was just drawn, and the rule name is stamped onto the card face itself in very heavy Hong Kong-standard Hei, set vertically and slightly tilted, like a group chanting its cheer; the field beneath carries the one-line instruction. Everything outside that field stays quiet ink, so the field always carries the moment.
 
 Density is low and vertical: one centred column at most 560px wide on a phone held in portrait, every target at least 44px, and a sticky full-width 抽牌 bar at the bottom. Depth is physical, not interface depth. Real playing cards cast soft shadows on the table and the name sticker sits on top of the card. Surfaces that are not objects on the table stay flat.
 
-Motion is ceremony: on each reveal the field wipes in from the left like a banner unfurling (叫口號), then the rule-name characters stamp in one at a time. A single expo-out curve governs every transition, and reduced motion turns all of it off.
+Motion is ceremony: on each reveal the card flips, the field wipes in from the left like a banner unfurling (叫口號), and the rule-name characters stamp onto the card one at a time. A single expo-out curve governs every transition, and reduced motion turns all of it off.
 
 **Key Characteristics:**
 - Night-ink ground (`#141210`) with warm paper text; dark colour scheme only.
@@ -238,7 +238,11 @@ Tactile paper slabs on ink; flat, firm, and large.
 Top bar only: the logo (display 900, with 大排檔 on a red tag tilted −3°) on the left, three 44px SVG icon buttons on the right (rules, share, settings). The rules page swaps the icons for the 開始玩 pill. The rules page also has a two-column jump list of ranks with hairline rows; hovering turns the rank yellow.
 
 ### Rule Field (signature)
-The full-bleed `[data-suit]` block under the card. It holds the chant (display, tilted −2°), one short line, the inverted target line, the 點玩 disclosure (custom chevron drawn with two 2.5px borders, rotating on open) and, for 4s, an inline input with an inverted submit button. Idle state uses Raised Ink with 撳抽牌開始. On reveal it runs 叫口號: `unfurl` (clip-path wipe from the left, 0.5s), then each character `stamp`s in (scale 1.7 → 1, −8° → 0, blur 3px → 0) at 0.14s intervals, then the short and target lines `rise` 8px.
+The full-bleed `[data-suit]` block under the card. It holds the lead line (`.lead`: display 900, `clamp(24px, 6.6vw, 32px)`/1.3, keep-all; the rule's one-line instruction, or the custom rule text), one short line only when no lead, the inverted target line, the 點玩 disclosure (custom chevron drawn with two 2.5px borders, rotating on open) and, for 4s, an inline input with an inverted submit button. Idle state uses Raised Ink with 撳抽牌開始. On reveal it runs 叫口號: `unfurl` (clip-path wipe from the left, 0.5s), while on the card face each rule-name character `stamp`s in (scale 1.7 → 1, −8° → 0, blur 3px → 0) at 0.14s intervals from 0.45s, then the lead and target lines `rise` 8px.
+
+### Card face rule (`.say`)
+
+The drawn card prints its rule name vertically (`writing-mode: vertical-rl`, display 900, `min(30cqw, 64cqh / n)`, tilted −3°) inside a 2px inset frame at 30% opacity; Latin runs sideways and digits stand upright (`text-combine-upright`). J/Q/K set each character in a filled suit-colour circle. Card-face ink uses the suit colour, with yellow deepened to `#a87200` and green to `#0f8a49` for contrast on paper. A custom rule longer than 6 characters is not printed; the card shows its pip and the field's lead line carries the text.
 
 ### Playing Card
 Drawn entirely in code: paper face, ink or red index in the display face, suit pips from authored SVG paths, joker index set vertically. It flips with a 0.55s 3D rotateY on the expo-out curve. The deck is a pressable stack of red layers offset by 3–6px with small rotations.

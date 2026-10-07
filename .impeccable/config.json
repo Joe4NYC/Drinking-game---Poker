@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "demo/card-faces.html"
+        ],
+        "createdAt": "2026-10-07T03:12:27.908Z",
+        "reason": "neon variant is a literal rendering of the user's supplied neon playing-card reference image"
+      }
+    ]
+  }
+}

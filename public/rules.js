@@ -117,10 +117,23 @@ const suitSVG = k => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${S
 function faceClass(c) {
   return 'face front' + (isRed(c) ? ' red' : '') + (c.r === 'JK' ? ' joker' : '');
 }
-function faceHTML(c) {
+// say：印喺牌面嘅規則名（直排），冇就顯示花色
+function sayHTML(c, say) {
+  const name = say.replace(/\s+/g, '');
+  const chars = [...name];
+  if (['J', 'Q', 'K'].includes(c.r)) {
+    return `<span class="say circles" style="--n:${chars.length}">${chars.map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</span>`;
+  }
+  // 中文逐字企，英文打側，數字企直
+  const n = name.replace(/[A-Za-z]/g, '').length + (name.match(/[A-Za-z]/g) || []).length * 0.55;
+  const parts = name.match(/\d+|[A-Za-z]+|./gu);
+  return `<span class="say" style="--n:${n}">${parts.map((p, i) =>
+    `<span style="--i:${i}"${/^\d+$/.test(p) ? ' class="tcy"' : ''}>${p}</span>`).join('')}</span>`;
+}
+function faceHTML(c, say) {
   const k = SUIT_KEY[c.s];
   const label = c.r === 'JK' ? 'JOKER' : c.r;
-  const center = ['J', 'Q', 'K'].includes(c.r) ? `<b>${c.r}</b>` : suitSVG(k);
+  const center = say ? sayHTML(c, say) : ['J', 'Q', 'K'].includes(c.r) ? `<b>${c.r}</b>` : suitSVG(k);
   const corner = `${label}${c.r === 'JK' ? '' : suitSVG(k)}`;
-  return `<span class="corner">${corner}</span><span class="pip">${center}</span><span class="corner br">${corner}</span>`;
+  return `<span class="corner">${corner}</span><span class="pip${say ? ' has-say' : ''}">${center}</span><span class="corner br">${corner}</span>`;
 }

@@ -70,7 +70,7 @@ function draw() {
   el.classList.remove('up');
   $('#sticker').classList.remove('on');
   setTimeout(() => {
-    showCard();
+    showCard(true);
     renderRule(true);
     renderStatus();
     renderTurn();
@@ -79,12 +79,25 @@ function draw() {
   }, wasUp ? 300 : 0);
 }
 
-function showCard() {
+// 牌面印規則名；自訂規則太長就唔印，改喺色塊大字顯示
+function cardSay(card) {
+  const custom = opts.custom[card.r];
+  if (!custom) return RULES[card.r].name;
+  return [...custom].length <= 6 ? custom : null;
+}
+
+function showCard(fresh) {
   const { card, who } = g.last;
   const front = $('#front');
+  const say = cardSay(card);
   front.className = faceClass(card);
-  front.innerHTML = faceHTML(card);
-  $('#card').classList.add('up');
+  front.innerHTML = faceHTML(card, say);
+  front.dataset.suit = SUIT_KEY[card.s];
+  const el = $('#card');
+  el.classList.toggle('fresh', !!fresh);
+  el.classList.add('up');
+  // 叫口號：牌面每蓋一粒字震一下
+  if (fresh && say) front.querySelectorAll('.say > span').forEach((_, i) => setTimeout(() => navigator.vibrate?.(12), 450 + i * 140));
   const st = $('#sticker');
   st.dataset.suit = SUIT_KEY[card.s];
   st.textContent = who ? `${who} 抽` : '';
@@ -129,12 +142,11 @@ function renderRule(animate) {
   const { card, who, prev, next } = g.last;
   const rule = RULES[card.r];
   const custom = opts.custom[card.r];
-  const act = who && (ACTS[card.r] || (w => `${w} 開始`))(who, prev, next);
+  const act = who && !custom && (ACTS[card.r] || (w => `${w} 開始`))(who, prev, next);
 
   box.dataset.suit = SUIT_KEY[card.s];
   box.innerHTML = `<div class="field-in">
-    ${chant(custom || rule.name)}
-    ${custom ? '' : `<p class="short">${rule.short}</p>`}
+    <h2 class="lead">${esc(custom || rule.short)}</h2>
     ${act ? `<p class="target">${esc(act)}</p>` : ''}
     ${card.r === '4' ? `<form class="law-form" id="law-form">
       <input type="text" name="law" maxlength="40" placeholder="寫低新規矩，方便大家記住" aria-label="新規矩">
@@ -149,9 +161,7 @@ function renderRule(animate) {
     box.classList.remove('unfurl');
     void box.offsetWidth;
     box.classList.add('unfurl');
-    box.style.setProperty('--n', [...(custom || rule.name)].length);
-    // 叫口號：每蓋一粒字震一下
-    [...(custom || rule.name)].forEach((_, i) => setTimeout(() => navigator.vibrate?.(12), 350 + i * 140));
+    box.style.setProperty('--n', 0);
   }
 }
 

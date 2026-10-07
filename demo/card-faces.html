@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>牌面規則 Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+Hei+HK:wght@900&display=swap">
+<style>
+  :root {
+    --ink: #141210; --ink-3: #2b2723; --paper: #f3eee3; --muted: #b3aa9e;
+    --display: "Chiron Hei HK", "PingFang HK", sans-serif;
+    --body: "PingFang HK", "Noto Sans HK", system-ui, sans-serif;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--paper); font: 17px/1.6 var(--body); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { font: 900 32px/1.2 var(--display); margin: 0; }
+  p.lead { color: var(--muted); margin: 6px 0 20px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 28px; }
+  .seg { display: inline-flex; background: var(--ink-3); border-radius: 999px; padding: 4px; }
+  .seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: 800 15px var(--body); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); }
+  .draw { min-height: 48px; padding: 0 24px; border: 0; border-radius: 12px; background: var(--paper); color: var(--ink); font: 900 17px var(--display); letter-spacing: .3em; cursor: pointer; }
+
+  .stage { display: grid; place-items: center; padding: 10px 0 40px; }
+  .stage .card { width: min(64vw, 260px); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px; }
+  .grid figure { margin: 0; }
+  .grid figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; text-align: center; }
+
+  /* ---------- 牌（共用）---------- */
+  .card {
+    --c: #d92b25;
+    position: relative;
+    aspect-ratio: 5 / 7;
+    border-radius: 7% / 5%;
+    container-type: size;
+    overflow: hidden;
+    box-shadow: 0 18px 36px rgb(0 0 0 / .55), 0 2px 4px rgb(0 0 0 / .4);
+    font-family: var(--display);
+    font-weight: 900;
+  }
+  .card[data-s="h"] { --c: #d92b25; --neon: #ff4f7b; }
+  .card[data-s="d"] { --c: #e0a800; --neon: #ffd23f; }
+  .card[data-s="s"] { --c: #2f5bea; --neon: #3fd0ff; }
+  .card[data-s="c"] { --c: #129a52; --neon: #45f08a; }
+  .card[data-s="j"] { --c: #141210; --neon: #e9e4ff; }
+  .card svg { display: block; fill: currentColor; }
+
+  .corner { position: absolute; top: 5%; left: 7%; display: flex; flex-direction: column; align-items: center; gap: 2cqw; font-size: 14cqw; line-height: .9; letter-spacing: -.04em; }
+  .corner svg { width: 10cqw; height: 10cqw; }
+  .corner.br { top: auto; left: auto; bottom: 5%; right: 7%; transform: rotate(180deg); }
+
+  /* 規則字：直排，按字數自動縮放 */
+  .rule {
+    position: absolute;
+    inset: 12% 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    font-size: min(30cqw, calc(66cqh / var(--n)));
+    line-height: 1;
+    letter-spacing: .04em;
+  }
+  .rule .tcy { text-combine-upright: all; }
+  .rule.circles { flex-direction: row; gap: 3cqh; }
+  .rule.circles span {
+    display: grid; place-items: center;
+    width: 1.5em; height: 1.5em;
+    font-size: min(17cqw, calc(40cqh / var(--n)));
+    border-radius: 50%;
+  }
+
+  /* ---------- 版本 A：組旗（同而家網站一致）---------- */
+  .camp .card { background: var(--paper); color: var(--c); }
+  .camp .card::before { content: ""; position: absolute; inset: 4.5% 6%; border: 2px solid var(--c); border-radius: 4% / 3%; opacity: .35; }
+  .camp .card .rule { color: var(--c); transform: rotate(-3deg); }
+  .camp .card .rule.circles span { background: var(--c); color: #fff; }
+  .camp .card[data-s="d"] .rule.circles span { color: var(--ink); }
+
+  /* ---------- 版本 B：霓虹 ---------- */
+  .neon .card { background: radial-gradient(120% 80% at 50% 40%, #221f2b, #0d0c11 70%); color: var(--neon); }
+  .neon .card::before {
+    content: ""; position: absolute; inset: 5% 7%;
+    border: 2.5px solid var(--neon); border-radius: 5% / 3.5%;
+    box-shadow: 0 0 6px var(--neon), 0 0 18px var(--neon), inset 0 0 10px color-mix(in oklab, var(--neon) 60%, transparent);
+    opacity: .9;
+  }
+  .neon .card .corner, .neon .card .rule {
+    color: #fff;
+    text-shadow: 0 0 4px var(--neon), 0 0 12px var(--neon), 0 0 28px var(--neon);
+  }
+  .neon .card .corner svg { filter: drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 10px var(--neon)); fill: #fff; }
+  .neon .card .rule.circles span { border: 2px solid var(--neon); box-shadow: 0 0 8px var(--neon), inset 0 0 8px var(--neon); }
+  .neon .card.flicker::before, .neon .card.flicker .rule { animation: flicker 1.1s steps(1) both; }
+  @keyframes flicker { 0% { opacity: .15 } 8% { opacity: .9 } 12% { opacity: .3 } 20% { opacity: 1 } 26% { opacity: .5 } 34%, 100% { opacity: 1 } }
+
+  .pop { animation: pop .55s var(--ease); }
+  @keyframes pop { from { transform: translateY(20px) rotate(-6deg) scale(.9); opacity: 0 } to { transform: none; opacity: 1 } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>牌面直接顯示規則 Demo</h1>
+  <p class="lead">兩個風格任揀：「組旗版」同而家網站一致；「霓虹版」參考你張相。J、Q、K 用圓圈字，其他牌用大字直排。</p>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="風格">
+      <button type="button" data-style="camp" aria-pressed="true">組旗版</button>
+      <button type="button" data-style="neon" aria-pressed="false">霓虹版</button>
+    </div>
+    <button class="draw" id="draw" type="button">抽牌</button>
+  </div>
+
+  <main id="root" class="camp">
+    <div class="stage" id="stage"></div>
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<script>
+// 由 public/rules.js 複製（demo 獨立運行）
+// 規則資料：遊戲頁同規則頁共用，改規則只改呢度
+const RULES = {
+  A: {
+    name: '指人飲',
+    short: '你話事，指定任何一個人飲',
+    how: ['抽牌嘅人指定枱上任何一位玩家飲一啖。'],
+  },
+  2: {
+    name: '陪飲員',
+    short: '你係陪飲員：之後有人飲，你都要陪佢飲',
+    how: [
+      '抽到 2 嘅人成為「陪飲員」。',
+      '之後無論邊個要飲，陪飲員都要同佢一齊飲。',
+      '直到下一個人抽到 2，先換新陪飲員。',
+    ],
+  },
+  3: {
+    name: '大細波',
+    short: '做大波動作要講「細波」，相反亦然，錯就飲',
+    how: [
+      '由抽牌嘅人開始，輪流做動作同時講嘢。',
+      '雙手喺胸前畫個大圈（大波），口要講「細波」；畫個細圈（細波），口要講「大波」。',
+      '動作同講嘅嘢一定要相反，做錯或者講錯嘅人飲一啖。',
+    ],
+  },
+  4: {
+    name: '開規矩',
+    short: '定一條新規矩，之後犯規就飲',
+    how: [
+      '抽牌嘅人定一條規矩，成局遊戲都有效。',
+      '任何人犯規就要飲一啖。',
+      '之後抽到 4 嘅人可以再開新規矩，或者取消之前嘅規矩。',
+    ],
+    examples: ['唔准講「飲」字', '唔准用手指指人', '講嘢之前要講「報告」'],
+  },
+  5: {
+    name: '圍枚',
+    short: '同枱上每個人逐一猜枚，輸就飲',
+    how: [
+      '抽牌嘅人同枱上每位玩家逐一猜一次枚。',
+      '猜咩枚自己揀，例如包剪揼、十五二十。',
+      '每一局輸咗嘅人飲一啖。',
+    ],
+    examples: ['十五二十：兩人每隻手出拳頭（0）或者打開（5），同時嗌 0、5、10、15 或 20，嗌中兩人加埋總數嘅贏'],
+  },
+  6: {
+    name: '開 Topic',
+    short: '定一個話題輪流講，講唔出或者重複就飲',
+    how: [
+      '抽牌嘅人定一個話題。',
+      '由佢開始，輪流講一樣屬於呢個話題嘅嘢。',
+      '講唔出、講錯或者講重複嘅人飲一啖。',
+    ],
+    examples: ['港鐵站名', '茶餐廳飲品', '香港歌手'],
+  },
+  7: {
+    name: '拍 7',
+    short: '輪流報數，有 7 字或者 7 嘅倍數要拍手',
+    how: [
+      '抽牌嘅人隨意講一個數字開始，其他人順次序報下一個數。',
+      '數字有 7 字（例如 17、27）或者係 7 嘅倍數（例如 14、21），唔可以講出口，要拍手代替。',
+      '拍手之後方向倒轉，輪返去上家繼續報數。',
+      '講咗出口、冇拍手或者拍錯嘅人飲一啖。',
+    ],
+  },
+  8: {
+    name: '廁所卡',
+    short: '收好呢張卡，想去廁所嗰陣用',
+    how: [
+      '抽到嘅人可以保留呢張卡。',
+      '想去廁所嗰陣出示廁所卡就可以去。',
+      '冇廁所卡想去點算？飲一啖先去，定係唔准去，你哋自己定。',
+    ],
+  },
+  9: {
+    name: '撞機',
+    short: '冇次序咁由 1 開始報數，撞到或者最後報嘅飲',
+    how: [
+      '所有人冇固定次序，由 1 開始，隨時講下一個數字，每人只可以講一次。',
+      '兩個人同時講同一個數字（撞機），兩個都要飲。',
+      '講返之前講過嘅數字都要飲。',
+      '最後一個未報數嘅人飲一啖。',
+    ],
+  },
+  10: {
+    name: '癡線佬',
+    short: '你係癡線佬，有人應你就要飲',
+    how: [
+      '抽到 10 嘅人成為「癡線佬」，可以隨時搵人講嘢、問問題。',
+      '任何人應咗癡線佬，就要飲一啖。',
+      '直到下一個人抽到 10，先換新癡線佬。',
+    ],
+  },
+  J: { name: '上家飲', short: '你上家飲一啖', how: ['抽牌嘅人嘅上家（即係上一個抽牌嘅人）飲一啖。'] },
+  Q: { name: '下家飲', short: '你下家飲一啖', how: ['抽牌嘅人嘅下家（即係下一個抽牌嘅人）飲一啖。'] },
+  K: { name: '自己飲', short: '抽到嘅人自己飲，飲啦飲啦！', how: ['抽到 K 嘅人自己飲一啖，冇得推。'] },
+  JK: {
+    name: '免飲卡',
+    short: '收好，可以抵銷一次要飲',
+    how: ['抽到嘅人可以保留呢張卡。', '之後要飲嗰陣出示免飲卡，就可以唔使飲一次。'],
+  },
+};
+const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const SUITS = ['♠', '♥', '♦', '♣'];
+
+// 牌面 HTML（遊戲頁同規則頁共用）
+const SUIT_KEY = { '♥': 'h', '♦': 'd', '♠': 's', '♣': 'c', red: 'j', black: 'j' };
+const SUIT_PATH = {
+  h: 'M50 90C22 68 6 52 6 32 6 17 17 7 31 7c9 0 15 5 19 12 4-7 10-12 19-12 14 0 25 10 25 25 0 20-16 36-44 58Z',
+  d: 'M50 4 88 50 50 96 12 50Z',
+  s: 'M50 5c13 22 42 35 42 56 0 14-10 22-22 22-7 0-13-3-16-9 1 9 5 16 12 22H34c7-6 11-13 12-22-3 6-9 9-16 9-12 0-22-8-22-22C8 40 37 27 50 5Z',
+  c: 'M50 6a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM27 39a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM73 39a19 19 0 1 1 0 38 19 19 0 1 1 0-38ZM45 50h10c0 19 4 33 13 45H32c9-12 13-26 13-45Z',
+  j: 'M50 4l13 30 32 3-24 21 7 32-28-17-28 17 7-32L5 37l32-3Z',
+};
+const isRed = c => c.s === '♥' || c.s === '♦' || c.s === 'red';
+const suitSVG = k => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${SUIT_PATH[k]}"/></svg>`;
+function faceClass(c) {
+  return 'face front' + (isRed(c) ? ' red' : '') + (c.r === 'JK' ? ' joker' : '');
+}
+// say：印喺牌面嘅規則名（直排），冇就顯示花色
+function sayHTML(c, say) {
+  const name = say.replace(/\s+/g, '');
+  const chars = [...name];
+  if (['J', 'Q', 'K'].includes(c.r)) {
+    return `<span class="say circles" style="--n:${chars.length}">${chars.map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</span>`;
+  }
+  // 中文逐字企，英文打側，數字企直
+  const n = name.replace(/[A-Za-z]/g, '').length + (name.match(/[A-Za-z]/g) || []).length * 0.55;
+  const parts = name.match(/\d+|[A-Za-z]+|./gu);
+  return `<span class="say" style="--n:${n}">${parts.map((p, i) =>
+    `<span style="--i:${i}"${/^\d+$/.test(p) ? ' class="tcy"' : ''}>${p}</span>`).join('')}</span>`;
+}
+function faceHTML(c, say) {
+  const k = SUIT_KEY[c.s];
+  const label = c.r === 'JK' ? 'JOKER' : c.r;
+  const center = say ? sayHTML(c, say) : ['J', 'Q', 'K'].includes(c.r) ? `<b>${c.r}</b>` : suitSVG(k);
+  const corner = `${label}${c.r === 'JK' ? '' : suitSVG(k)}`;
+  return `<span class="corner">${corner}</span><span class="pip${say ? ' has-say' : ''}">${center}</span><span class="corner br">${corner}</span>`;
+}
+
+</script>
+<script>
+  const KEY = { '♥': 'h', '♦': 'd', '♠': 's', '♣': 'c' };
+  const svg = k => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${SUIT_PATH[k]}"/></svg>`;
+
+  function card(r, s) {
+    const k = r === 'JK' ? 'j' : KEY[s];
+    const name = RULES[r].name.replace(/\s+/g, '');
+    const chars = [...name];
+    // 直排：中文逐字企，英文打側，數字企直（縱中橫）
+    const n = [...name.replace(/[A-Za-z]/g, '')].length + (name.match(/[A-Za-z]/g) || []).length * 0.55;
+    const vertical = name.replace(/\d+/g, d => `<span class="tcy">${d}</span>`);
+    const label = r === 'JK' ? '鬼' : r;
+    const corner = `<span>${label}</span>${svg(k)}`;
+    const face = ['J', 'Q', 'K'].includes(r)
+      ? `<div class="rule circles" style="--n:${chars.length}">${chars.map(c => `<span>${c}</span>`).join('')}</div>`
+      : `<div class="rule" style="--n:${n}">${vertical}</div>`;
+    return `<div class="card" data-s="${k}" role="img" aria-label="${label} ${RULES[r].name}">
+      <div class="corner">${corner}</div>${face}<div class="corner br">${corner}</div></div>`;
+  }
+
+  // 全部 14 張，花色輪住用
+  document.getElementById('grid').innerHTML = [...RANKS, 'JK'].map((r, i) =>
+    `<figure>${card(r, SUITS[i % 4])}<figcaption>${r === 'JK' ? '鬼' : r} · ${RULES[r].short}</figcaption></figure>`).join('');
+
+  const stage = document.getElementById('stage');
+  function draw() {
+    const all = [...SUITS.flatMap(s => RANKS.map(r => [r, s])), ['JK', '♠']];
+    const [r, s] = all[Math.floor(Math.random() * all.length)];
+    stage.innerHTML = card(r, s);
+    const el = stage.firstElementChild;
+    el.classList.add('pop', 'flicker');
+  }
+  document.getElementById('draw').addEventListener('click', draw);
+  draw();
+
+  document.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('root').className = b.dataset.style;
+    document.querySelectorAll('[data-style]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    draw();
+  }));
+</script>
+</body>
+</html>
